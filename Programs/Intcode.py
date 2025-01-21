@@ -1,5 +1,9 @@
-def run(program, inp=None):
-    pos = 0
+def run(program, inp=None, start=None):
+    if not start:
+        start = [0]
+    pos = start[0]
+    inp_i = 0
+    out = None
     while pos < len(program):
         modes, opcode = setup(program[pos])
         match opcode:
@@ -16,12 +20,17 @@ def run(program, inp=None):
                 program[c] = a*b
                 pos += 4
             case 3:
-                c = program[pos+1]
-                program[c] = inp
-                pos += 2
+                if inp_i < len(inp):
+                    c = program[pos+1]
+                    program[c] = inp[inp_i]
+                    inp_i += 1
+                    pos += 2
+                else:
+                    start[0] = pos
+                    return out
             case 4:
                 a = get(program, pos+1, modes[0])
-                print(a)
+                out = a
                 pos += 2
             case 5:
                 a = get(program, pos+1, modes[0])
@@ -50,7 +59,8 @@ def run(program, inp=None):
                 program[c] = 1 if a == b else 0
                 pos += 4
             case 99:
-                return program
+                start[0] = None
+                return out
 
 
 def setup(instr):
